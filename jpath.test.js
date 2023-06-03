@@ -208,7 +208,8 @@ assertNeg(
 				text:(...args)=>{
 					const [text	,message  ,inbox	,user  ,users]=jpath.getValues(...args);
 					const [_text,messageIx,_inbox,userId,_users]=jpath.getKeys(...args);
-					const ok=(_text=='text') && (_inbox=='inbox') && (_users=='users') &&
+					const root=jpath.getRoot(...args);
+					const ok=(_text=='text') && (_inbox=='inbox') && (_users=='users') && (root==users) &&
 						(user.inbox==inbox) && (inbox[messageIx]==message) && (message.text==text);
 					return ok?0:'error';
 				}

@@ -59,8 +59,14 @@ Array.prototype[sFirstError]=function(callback){
 	return e;
 }
 
+const getRoot=(...args)=>{
+	const n=args.length;
+	const i=(n-1) - ((n-1) % 2);
+	return args[i];
+}
+
 const getPath=(...args)=>{
-	let s='';
+	let s='',k=[],v=[];
 	for(let i=1;i<args.length;i+=2){
 		s='/'+encodeURIComponent(args[i])+s;
 	};
@@ -74,6 +80,7 @@ const getKeys=(...args)=>{
 	};
 	return k;
 }
+
 const getValues=(...args)=>{
 	const v=[];
 	for(let i=0;i<args.length;i+=2){
@@ -81,6 +88,9 @@ const getValues=(...args)=>{
 	};
 	return v;
 }
+
+const getPathKeys=(...args)=>getKeys(...args).reverse();
+const getPathValues=(...args)=>getValues(...args).reverse();
 
 /*
  a value test function has the form
@@ -236,5 +246,24 @@ const isoDate=()=>{
 
 
 if(typeof module != 'undefined'){
-    module.exports={getKeys,getValues,getPath,nameFilter,valueTest,valueFilter,key,unique,either,all,not,empty,notEmpty,email,isoDate};
-}
+    module.exports={
+		getKeys		,
+		getPathKeys	,
+		getValues	,
+		getPathValues,
+		getPath		,
+		getRoot		,
+		nameFilter	,
+		valueTest	,
+		valueFilter	,
+		key			,
+		unique		,
+		either		,
+		all			,
+		not			,
+		empty		,
+		notEmpty	,
+		email		,
+		isoDate
+	};
+};
