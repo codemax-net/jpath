@@ -1,0 +1,26 @@
+{
+  "name": "jpath",
+  "version": "1.0.4",
+  "description": "jpathTest",
+  "main": "jpath.js",
+  "scripts": {
+    "test": "node ./jpath.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://s3.codemax.net/metaxas/jpath"
+  },
+  "author": "G.Metaxas",
+  "license": "ISC",
+  "devDependencies": {},
+  "keywords": [
+    "jpath",
+    "json",
+    "format",
+    "validation",
+    "filter",
+    "selection",
+    "xpath",
+    "style"
+  ]
+}
