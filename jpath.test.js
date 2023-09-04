@@ -299,4 +299,16 @@ console.group(FG_YELLOW,'test versus filter results',FG_RESET);
 	);
 console.groupEnd();
 
+assertTrue(
+	()=>valueTest({'*':{
+		name:jpath.unique(String)
+	}})(dataset)
+);
+
+assertFalse(
+	()=>valueTest({'*':{
+		email:jpath.unique(String)
+	}})(dataset)
+)
+
 

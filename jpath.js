@@ -205,10 +205,12 @@ const key=(pattern)=>{
 
 const unique=(pattern)=>{
 	const test=pattern && valueTest(pattern);
-	const parentTest=valueTest(Array);
+	const parentTest=valueTest(Object);
 	return	(value,key,self,skey,parent,...ancestors) => 
 				(test && test(value,key,self,skey,parent,...ancestors)) || parentTest(parent,...ancestors) ||
-					( (self==parent.findLast(item=>item[key]==value))?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be unique`);
+					( (parent=Array.isArray(parent)?parent:Object.values(parent)) && 
+						(self==parent.findLast(item=>item[key]==value)
+					)?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be unique`);
 }
 
 const either=(...patterns)=>{
