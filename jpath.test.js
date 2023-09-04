@@ -47,65 +47,91 @@ const FG_GREEN 	='\x1b[32m';
 const FG_YELLOW	='\x1b[33m'	, FG_YELLOW_BRIGHT	='\x1b[93m';
 const FG_BLUE  	='\x1b[34m'	, FG_BLUE_BRIGHT	='\x1b[94m';
 
-function assertPos(fn){
+function assertTrue(title,fn){
+	if(!fn){
+		fn=title;
+		title='';
+	};
 	const ret=fn();
-	console.log(FG_RESET);
+	console.log(FG_YELLOW,title||'');
 	if(!ret){
-		console.log(FG_RED,'assertPos',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,ret,FG_RESET);
+		console.log(FG_RED,'assertTrue',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,ret,FG_RESET);
 		process.exit(-1);
 	}else{
-		console.log(FG_GREEN,'assertPos',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT, ret, FG_RESET);
+		console.log(FG_GREEN,'assertTrue',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT, ret, FG_RESET);
 	}
 }
-function assertNeg(fn){
+function assertFalse(title,fn){
+	if(!fn){
+		fn=title;
+		title='';
+	};
 	const err=fn();
-	console.log(FG_RESET);
+	console.log(FG_YELLOW,title||'');
 	if(err){
-		console.log(FG_RED,'assertNeg',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,err,FG_RESET);
+		console.log(FG_RED,'assertFalse',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,err,FG_RESET);
 		process.exit(-1);
 	}else{
-		console.log(FG_GREEN,'assertNeg',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT,err,FG_RESET);
+		console.log(FG_GREEN,'assertFalse',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT,err,FG_RESET);
 	}
 }
 
 console.group(FG_YELLOW,'primitive jpath test',FG_RESET);
-	assertNeg(()=>valueTest(String)("string")		);
-	assertPos(()=>valueTest(String)(123)			);
+	assertFalse(()=>valueTest(String)("string")		);
+	assertTrue(()=>valueTest(String)(123)			);
 	
-	assertNeg(()=>valueTest(Number)(123)			);
-	assertPos(()=>valueTest(Number)(null)			);
+	assertFalse(()=>valueTest(Number)(123)			);
+	assertTrue(()=>valueTest(Number)(null)			);
 	
-	assertNeg(()=>valueTest(Object)(null)			);
-	assertPos(()=>valueTest(Object)(123)			);
+	assertFalse(()=>valueTest(Object)(null)			);
+	assertTrue(()=>valueTest(Object)(123)			);
 	
-	assertNeg(()=>valueTest(Object)({})				);
-	assertPos(()=>valueTest(Object)("string")		);
+	assertFalse(()=>valueTest(Object)({})			);
+	assertTrue(()=>valueTest(Object)("string")		);
 	
-	assertNeg(()=>valueTest(Function)((x)=>x)		);
-	assertPos(()=>valueTest(Function)([])			);
+	assertFalse(()=>valueTest(Function)((x)=>x)		);
+	assertTrue(()=>valueTest(Function)([])			);
 	
-	assertNeg(()=>valueTest(Array)([])				);	
-	assertPos(()=>valueTest(Array)(undefined)		);
+	assertFalse(()=>valueTest(Array)([])			);	
+	assertTrue(()=>valueTest(Array)(undefined)		);
 	
-	assertNeg(()=>valueTest(undefined)(undefined)	);
-	assertPos(()=>valueTest(undefined)(null)		);
+	assertFalse(()=>valueTest(undefined)(undefined)	);
+	assertTrue(()=>valueTest(undefined)(null)		);
 	
-	assertNeg(()=>valueTest(null)(null)				);	
-	assertPos(()=>valueTest(null)(undefined)		);	
+	assertFalse(()=>valueTest(null)(null)			);	
+	assertTrue(()=>valueTest(null)(undefined)		);	
 console.groupEnd();
 
-assertNeg(()=>valueTest({'*':{}})(dataset)			);
+console.group(FG_YELLOW,'date jpath test',FG_RESET);
+	assertFalse(
+		()=>valueTest(jpath.isoDate())(new Date().toISOString())
+	);
 
-assertNeg(
+	assertFalse(
+		()=>valueTest(jpath.isoDate())('2020-10-10')
+	);
+
+	assertFalse(
+		()=>valueTest(jpath.isoDate())('2020-10-10T12:20')
+	);
+
+	assertTrue(
+		()=>valueTest(jpath.isoDate())('this is not a date')
+	);
+console.groupEnd();
+
+assertFalse('dataset is an object of objects',()=>valueTest({'*':{}})(dataset));
+
+assertFalse('every object in the dataset has an id and an email string property',
 	()=>valueTest({
 		'*':{
 			id:String,
 			email:String
 		}
-	})(dataset)										
+	})(dataset)
 );
 
-assertNeg(
+assertFalse(
 	()=>valueTest({
 		'*':{
 			[/id|email/]:String
@@ -113,18 +139,18 @@ assertNeg(
 		'admin':{
 			isAdmin:true
 		}
-	})(dataset)										
+	})(dataset)
 );
 
-assertNeg(
+assertFalse(
 	()=>valueTest({
 		'*':{
 			[/id|email/]:String
 		}
-	})(dataset)										
+	})(dataset)
 );
 
-assertNeg(
+assertFalse(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
@@ -132,29 +158,29 @@ assertNeg(
 			name:jpath.notEmpty(String),
 			inbox:jpath.either(undefined,Array)
 		}
-	})(dataset)										
+	})(dataset)
 );
 
-assertPos(
+assertTrue(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
 			email:jpath.email(),
 			inbox:Array
-	}})(dataset)									
+	}})(dataset)
 );
 
-assertNeg(
+assertFalse(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
 			email:jpath.email(),
 			inbox:jpath.either(undefined,[,,{from:String,text:String}])
 		}
-	})(dataset)										
+	})(dataset)
 );
 
-assertPos(
+assertTrue(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
@@ -163,31 +189,31 @@ assertPos(
 	}})(dataset)
 );
 
-assertPos(
+assertTrue(
 	()=>valueTest({
 		'*':{
 			name:jpath.key()//assuming that "name" should have been an identity property 
 		}
-	})(dataset)										
+	})(dataset)
 );
 
 
-assertNeg(
+assertFalse(
 	()=>valueTest([,,{
 			id:jpath.unique(),
 			email:jpath.email(),
 			inbox:jpath.either(undefined,[,,{from:String,text:String}])
-	}])(Object.values(dataset))										
+	}])(Object.values(dataset))
 );
 
-assertNeg(
-	()=>valueTest([{isAdmin:true},{id:'sales'},{id:'support'}])(Object.values(dataset))										
+assertFalse(
+	()=>valueTest([{isAdmin:true},{id:'sales'},{id:'support'}])(Object.values(dataset))
 );
-assertPos(
-	()=>valueTest([{id:'sales'},{id:'support'},{isAdmin:true}])(Object.values(dataset))										
+assertTrue(
+	()=>valueTest([{id:'sales'},{id:'support'},{isAdmin:true}])(Object.values(dataset))
 );
 
-assertPos(
+assertTrue(
 	()=>{
 		const hasInboxFilter=valueFilter({
 				inbox:[,,{from:String,text:String}]
@@ -198,7 +224,7 @@ assertPos(
 	}		
 );
 
-assertNeg(
+assertFalse(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
@@ -217,7 +243,7 @@ assertNeg(
 	}})(dataset,'users')
 );
 
-assertPos(
+assertTrue(
 	()=>valueTest({
 		'*':{
 			id:jpath.key(),
@@ -233,30 +259,44 @@ assertPos(
 );
 
 
-assertNeg(
-	()=>valueTest(jpath.isoDate())(new Date().toISOString())
-);
-
-assertNeg(
-	()=>valueTest(jpath.isoDate())('2020-10-10')
-);
-
-assertNeg(
-	()=>valueTest(jpath.isoDate())('2020-10-10T12:20')
-);
-
-assertPos(
-	()=>valueTest(jpath.isoDate())('this is not a date')
-);
-
-assertPos(
+assertTrue(
 	()=>valueTest({
 		'*':{
 			id:String,
 			email:jpath.email('strict')
 		}
-	})(dataset)										
+	})(dataset)
 );
 
+console.group(FG_YELLOW,'test versus filter results',FG_RESET);
+	assertFalse(
+		()=>valueTest([{id:'admin'},{id:'support'}])(
+			Object.values(dataset).filter(valueFilter({
+				inbox:jpath.notEmpty(Array)
+			}))
+		)
+	);
+	assertFalse(
+		()=>valueTest([dataset.admin,dataset.support])(
+			Object.values(dataset).filter(valueFilter({
+				inbox:jpath.notEmpty(Array)
+			}))
+		)
+	);
+	assertFalse(
+		()=>valueTest([{id:'sales'}])(
+			Object.values(dataset).filter(valueFilter({
+				inbox:undefined
+			}))
+		)
+	);
+	assertFalse(
+		()=>valueTest([dataset.sales])(
+			Object.values(dataset).filter(valueFilter({
+				inbox:undefined
+			}))
+		)
+	);
+console.groupEnd();
 
 
