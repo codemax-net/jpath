@@ -27,7 +27,7 @@
 const nameFilter=(pattern)=>{
     if(typeof pattern=='symbol'){
         const fn=globalThis[pattern];
-        return names => names.filter(fn);
+        return fn && (names => names.filter(fn));
     }else
     if(pattern[0]=='\\'){// so that we can use "*", "^" , "/" and "," as path-selectors 
         return names => [pattern.slice(1)];
@@ -47,6 +47,15 @@ const nameFilter=(pattern)=>{
         return names => keys;
     };
 }
+
+/*special property for testing "Sealed" Objects, i.e. all their properties must be validated by one of the patterns.
+	e.g. the valueTest below validates object with exactly the foo and bar string properties 
+	{
+		[jpath.sSealed]:true,
+		/foo|bar/:String,
+	}
+*/
+const sSealed=Symbol('Sealed object');
 
 const sFirstError=Symbol();
 Array.prototype[sFirstError]=function(callback){
@@ -167,9 +176,21 @@ const valueTest=(pattern,errorMessage)=>{
 						return `"${getPath(v,...args)}" ${errorMessage||'must be an object...'}`;
 					};
                     const keys=Object.keys(v);
-					return nameValueTests[sFirstError](test => test.name(keys)[sFirstError](key =>
-						test.value(v[key],key,v,...args)
-					));
+					if(pattern[sSealed]){
+						const notValidatedKeys=pattern[sSealed] && new Set(keys);
+						const error=nameValueTests[sFirstError](test => test.name && test.name(keys)[sFirstError](key =>{
+							const err=(key!==sSealed) && test.value(v[key],key,v,...args);
+							if(!err){
+								notValidatedKeys.delete(key);
+							};
+							return err;
+						}));
+						return error || (notValidatedKeys.size && `"${getPath(v,...args)}/${[...notValidatedKeys][0]}" is not allowed! Object is sealed.'}`);
+					}else{
+						return nameValueTests[sFirstError](test => test.name(keys)[sFirstError](key =>
+							test.value(v[key],key,v,...args)
+						));
+					}
                 }
             }else{//pattern == null, the value must be null
 				return (v,...args) => (v === null)?0:`"${getPath(v,...args)}" ${errorMessage||'must be null'}`;
@@ -249,6 +270,7 @@ const isoDate=()=>{
 
 if(typeof module != 'undefined'){
     module.exports={
+		sealed:sSealed,
 		getKeys		,
 		getPathKeys	,
 		getValues	,

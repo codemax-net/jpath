@@ -312,3 +312,18 @@ assertFalse(
 )
 
 
+assertFalse('Sealed test(all the object properties are validated)',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		'admin,sales,support':Object
+	})(dataset)
+);
+
+assertTrue('Sealed test(some of the properties are not validated)',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		'admin':Object
+	})(dataset)
+);
+
+
