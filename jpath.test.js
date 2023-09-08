@@ -76,6 +76,7 @@ function assertFalse(title,fn){
 	}
 }
 
+
 console.group(FG_YELLOW,'primitive jpath test',FG_RESET);
 	assertFalse(()=>valueTest(String)("string")		);
 	assertTrue(()=>valueTest(String)(123)			);
@@ -121,6 +122,24 @@ console.group(FG_YELLOW,'date jpath test',FG_RESET);
 console.groupEnd();
 
 assertFalse('dataset is an object of objects',()=>valueTest({'*':{}})(dataset));
+
+assertTrue('every object in the dataset has an id and an email string property',
+	()=>valueTest({
+		'*':{
+			id:String,
+			email:String
+		}
+	})(
+		{
+			foo:{
+				id:123
+			},
+			bar:{
+				email:'a@b.c'
+			}
+		}
+	)
+);
 
 assertFalse('every object in the dataset has an id and an email string property',
 	()=>valueTest({
@@ -326,4 +345,70 @@ assertTrue('Sealed test(some of the properties are not validated)',
 	})(dataset)
 );
 
+assertTrue('Empty string key(error)',
+	()=>valueTest({
+		'*':{
+			id:jpath.key()
+		}
+	})({'':{id:''}})
+);
 
+assertFalse('Empty string key(accepted)',
+	()=>valueTest({
+		'*':{
+			id:jpath.key(String)
+		}
+	})({'':{id:''}})
+);
+
+assertFalse('name filter function',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		[jpath.nameFilter(k=>true)]:{
+			id:jpath.key(String)
+		}
+	})(dataset)
+);
+
+assertTrue('name filter function',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		[jpath.nameFilter(k=>false)]:{
+			id:jpath.key(String)
+		}
+	})(dataset)
+);
+
+assertFalse('name filter array',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		[jpath.nameFilter(['admin','sales','support'])]:{
+			id:jpath.key(String)
+		}
+	})(dataset)
+);
+
+assertTrue('name filter array',
+	()=>valueTest({
+		[jpath.nameFilter(['foo','bar'])]:{
+			id:jpath.key(String)
+		}
+	})(dataset)
+);
+
+assertFalse('name filter reg-ex',
+	()=>valueTest({
+		[jpath.sealed]:true,
+		[jpath.nameFilter(/admin|support|sales/)]:{
+			id:jpath.key(String)
+		}
+	})(dataset)
+);
+
+assertTrue('name filter reg-ex',
+	()=>valueTest({
+		[jpath.nameFilter(/foo|bar/)]:{
+			id:jpath.key(String)
+		}
+	})({foo:{},bar:{}})
+);

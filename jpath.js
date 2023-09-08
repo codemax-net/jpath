@@ -24,28 +24,77 @@
 *	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *	
 */
-const nameFilter=(pattern)=>{
-    if(typeof pattern=='symbol'){
-        const fn=globalThis[pattern];
-        return fn && (names => names.filter(fn));
-    }else
-    if(pattern[0]=='\\'){// so that we can use "*", "^" , "/" and "," as path-selectors 
-        return names => [pattern.slice(1)];
-    }else
-    if(pattern=='*'){//matches all names
-        return names => names;
-    }else				
-    if(pattern[0]=='^'){//matches any name except those defined in the comma separated list e.g. '^foo,bar': ...
-        const exlcude=new Set(pattern.slice(1).split(','));
-        return names => names.filter(k => !exlcude.has(k));
-    }else
-    if(pattern[0]=='/'){//matches any name that the regular expression described by the pattern matches
-        const regEx=new RegExp(pattern.slice(1,-1));
-        return names => names.filter(k => regEx.test(k));
-    }else{//matches the names in the comma separated lsit
-        const keys=pattern.split(',');
-        return names => keys;
-    };
+
+/**
+	@param pattern
+		when the pattern is a string or a number then the filter returns [pattern].
+			Thus the tested object must have a property named pattern that passes the value test
+		when the pattern is a function then the filter returns a function that filters
+			the names of the tested object that pass the filter function specified by pattern.
+			(The filter function is a function as the Array.prototype.filter callback function)
+		when the pattern is an array then the filter returns pattern
+			Thus the tested object must have all the properties defined in pattern passing the value test
+		when the pattern is a regular expression then the filter returns a function that filters
+			the names of the tested object that pass the regular expression specified by pattern.
+*/
+const nameFilter=function nameFilter(pattern){
+	const filterSymbol=Symbol();
+	let filterFunction;
+	switch(typeof pattern){
+		case 'string'	: case 'number'	://so that we can filter without escaping(since the literal keys use *, ^, / as special characters)
+			filterFunction= names=>[pattern];//the object must have the propery 
+			break;
+		case 'function'	:
+			filterFunction= names=> names.filter(pattern);
+			break;
+		case 'object'	:
+			if(Array.isArray(pattern)){
+				filterFunction= names => pattern;//all the items in the pattern must pass the test
+				break;
+			}else
+			if(pattern instanceof RegExp){
+				filterFunction= names=> names.filter(key=> pattern.test(key));
+				break;
+			}
+		default:
+			throw new Error('Unsupported pattern');
+	};
+	nameFilter[filterSymbol]=filterFunction;
+	return filterSymbol;
+}
+
+/**
+	used internally to convert filter names to filter functions
+	@param pattern
+		- when the pattern is a symbol, we look in the dictionary for a specified filter function(see above)
+		- when the pattern is '*' then we return a function that matches all the names
+		- when the pattern starts with '^' then we return a function that matches any name except those defined in the comma separated list e.g. '^foo,bar': ...
+		- when the pattern starts with '/' then we return a function that matches any name that the regular expression described by the pattern matches
+		- in all other cases we return a function that matches the names in the comma separated list defined by pattern
+		- when the pattern starts with '\' then it is considered an escape character (allowing to treat "*","^","/",and "," as normal characters)
+*/
+const nameToFilter=(pattern)=>{
+	if(typeof pattern == 'symbol'){
+		const fn=nameFilter[pattern];
+		return (typeof fn == 'function')?fn: names => names.filter(k=>k==pattern);
+	}else
+	if(pattern[0]=='\\'){// so that we can use "*", "^" , "/" and "," as path-selectors 
+		return names => [pattern.slice(1)];
+	}else
+	if(pattern=='*'){//matches all names
+		return names => names;
+	}else				
+	if(pattern[0]=='^'){//matches any name except those defined in the comma separated list e.g. '^foo,bar': ...
+		const exlcude=new Set(pattern.slice(1).split(','));
+		return names => names.filter(k => !exlcude.has(k));
+	}else
+	if(pattern[0]=='/'){//matches any name that the regular expression described by the pattern matches
+		const regEx=new RegExp(pattern.slice(1,-1));
+		return names => names.filter(k => regEx.test(k));
+	}else{//matches the names in the comma separated lsit
+		const keys=pattern.split(',');
+		return names => keys;
+	};
 }
 
 /*special property for testing "Sealed" Objects, i.e. all their properties must be validated by one of the patterns.
@@ -164,7 +213,7 @@ const valueTest=(pattern,errorMessage)=>{
             }else
 			if(pattern){
                 const nameValueTests=[...Object.keys(pattern),...Object.getOwnPropertySymbols(pattern)].map(key=>({
-					name :nameFilter(key),
+					name :nameToFilter(key),
 					value:valueTest(pattern[key])
 				}));
                 return (v,...args) =>{//V[k]==v
@@ -218,7 +267,7 @@ const notEmpty=(pattern)=>{
 	return (v,...args) => test(v,...args) || (v.length?0:`"${getPath(v,...args)}" should not be empty`);
 }
 
-const key=(pattern)=>{
+const key=(pattern=notEmpty(String))=>{
 	const test=pattern && valueTest(pattern);
 	return (value,key,self,skey,parent,...ancestors)=> (test && test(value,key,self,skey,parent,...ancestors)) || 
 		((self===parent[value])?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be an identity property`);  
@@ -267,7 +316,6 @@ const isoDate=()=>{
 	return (v,...args)=> isNaN(new Date(v).valueOf())?`${getPath(v,...args)} "${v}" must be a valid date`:0;
 }
 
-
 if(typeof module != 'undefined'){
     module.exports={
 		sealed:sSealed,
@@ -288,6 +336,6 @@ if(typeof module != 'undefined'){
 		empty		,
 		notEmpty	,
 		email		,
-		isoDate
+		isoDate		,
 	};
 };
