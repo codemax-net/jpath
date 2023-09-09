@@ -308,15 +308,28 @@ const all=(...patterns)=>{
 	return	(...args)=> tests[sFirstError](test=>test(...args));
 }
 
+/**
+	when init returns undefined we assume that it altered the value directly, otherwise we update the value 
+*/
 const initAs=(test,init)=>{
-	return either(test,all(undefined,(v,n,p,...rest)=>{
-		v=typeof init=='function'?init(v,n,p,...rest):init;
-		const err=valueTest(test)(v,n,p,...rest);
-		if(!err){
-			p[n]=v;
-		}
-		return err;
-	}));
+	if(typeof init=='function'){
+		return either(test,all(undefined,(v,n,p,...rest)=>{		
+			v=init(v,n,p,...rest);
+			const err=valueTest(test)((v!==undefined)?v:p[n],n,p,...rest)
+			if(!err && (v!==undefined)){
+				p[n]=v;
+			};
+			return err;
+		}));
+	}else{
+		return either(test,(v,n,p,...rest)=>{		
+			const err=valueTest(test)(init,n,p,...rest);
+			if(!err){
+				p[n]=init;
+			};
+			return err;
+		});
+	};
 }
 
 
