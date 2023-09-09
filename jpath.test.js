@@ -413,29 +413,42 @@ assertTrue('name filter reg-ex',
 	})({foo:{},bar:{}})
 );
 
-assertFalse('initAs',
-	()=>valueTest(jpath.all({
-		bar:Number,
-		foo:jpath.initAs(
-			{
-				x:Number,y:Number
-			},(v,n,p)=>({
-				x:p.bar*3,y:p.bar+3
-			})
+assertFalse(
+	()=>valueTest({
+		foo:jpath.testOrUpdate(
+			{x:Number,y:Number},
+			String,
+			(v,n,p)=>({x:+p.foo*3,y:+p.foo+3})
 		)
-	},{bar:4,foo:{x:12,y:7}}))({bar:4})
-)
+	})({foo:'4'})
+);
 
-assertTrue('initAs',
-	()=>valueTest(jpath.all({
-		bar:Number,
-		foo:jpath.initAs(
-			{
-				x:Number,y:Number
-			},(v,n,p)=>({
-				x:p.bar*3,y:p.bar+3
-			})
+assertTrue(
+	()=>valueTest({
+		foo:jpath.testOrUpdate(
+			{x:Number,y:Number},
+			String,
+			(v,n,p)=>({x:+p.foo*3,y:'8'})
 		)
-	},{bar:4,foo:{x:12,y:5}}))({bar:4})
-)
+	})({foo:'4'})
+);
 
+assertFalse(
+	()=>valueTest({
+		foo:jpath.testOrUpdate(
+			{x:Number,y:Number},
+			String,
+			{x:10,y:4}
+		)
+	})({foo:'4'})
+);
+
+assertTrue(
+	()=>valueTest({
+		foo:jpath.testOrUpdate(
+			{x:Number,y:Number},
+			String,
+			{x:10,y:'4'}
+		)
+	})({foo:'4'})
+);

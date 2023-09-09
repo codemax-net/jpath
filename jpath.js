@@ -309,29 +309,34 @@ const all=(...patterns)=>{
 }
 
 /**
-	when init returns undefined we assume that it altered the value directly, otherwise we update the value 
+	testOrUpdate uses the newTest as a value-test
+		when the newTest fails, and the value matches the oldTest updValue is used to update the old value
+	if updValue is a function
+		when it returns undefined we assume that it altered the value directly, otherwise we update the value using its result 
 */
-const initAs=(test,init)=>{
-	if(typeof init=='function'){
-		return either(test,all(undefined,(v,n,p,...rest)=>{		
-			v=init(v,n,p,...rest);
-			const err=valueTest(test)((v!==undefined)?v:p[n],n,p,...rest)
-			if(!err && (v!==undefined)){
-				p[n]=v;
+const testOrUpdate=(newTest,oldTest,updValue)=>{
+	const updValueIsFunction=typeof updValue=='function';
+	newTest=valueTest(newTest);
+	oldTest=valueTest(oldTest);
+	return	(v,n,p,...rest)=>{
+		let err=newTest(v,n,p,...rest);
+		if(err && !oldTest(v,n,p,...rest)){//update
+			if(updValueIsFunction){
+				v=updValue(v,n,p,...rest);
+				if(v!==undefined){
+					p[n]=v;
+				};	
+			}else{
+				p[n]=updValue;
 			};
-			return err;
-		}));
-	}else{
-		return either(test,(v,n,p,...rest)=>{		
-			const err=valueTest(test)(init,n,p,...rest);
-			if(!err){
-				p[n]=init;
+			err=newTest(p[n],n,p,...rest);
+			if(err){
+				return 'Update failed! '+err;
 			};
-			return err;
-		});
-	};
-}
-
+		};
+		return err;
+	};		
+};
 
 const emailStrict=/(?:[a-z0-9+!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/i;
 const emailSimple=/[^\s@]+@[^\s@]+\.[^\s@]+/;
@@ -362,6 +367,6 @@ if(typeof module != 'undefined'){
 		notEmpty	,
 		email		,
 		isoDate		,
-		initAs		,
+		testOrUpdate,
 	};
 };
