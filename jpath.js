@@ -267,10 +267,17 @@ const notEmpty=(pattern)=>{
 	return (v,...args) => test(v,...args) || (v.length?0:`"${getPath(v,...args)}" should not be empty`);
 }
 
-const key=(pattern=notEmpty(String))=>{
+const key=(pattern=either(notEmpty(String),Number))=>{
 	const test=pattern && valueTest(pattern);
 	return (value,key,self,skey,parent,...ancestors)=> (test && test(value,key,self,skey,parent,...ancestors)) || 
 		((self===parent[value])?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be an identity property`);  
+}
+
+const ID=()=>{
+	return (v0,k0,v1,k1)=> {
+		v1[k0]=k1;
+		return 0;
+	}
 }
 
 const unique=(pattern)=>{
@@ -358,6 +365,7 @@ if(typeof module != 'undefined'){
 		nameFilter	,
 		valueTest	,
 		valueFilter	,
+		ID			,
 		key			,
 		unique		,
 		either		,

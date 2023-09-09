@@ -452,3 +452,17 @@ assertTrue(
 		)
 	})({foo:'4'})
 );
+
+assertFalse(
+	()=>valueTest(jpath.all(
+		{'*':{id:jpath.ID()}},
+		{'*':{id:jpath.key()}}
+	))({a:{},b:{},c:{}})
+);
+
+assertFalse(
+	()=>valueTest(jpath.all(
+		[,,{id:jpath.ID()}],
+		[,,{id:jpath.key()}]
+	))([{},{},{}])
+);
