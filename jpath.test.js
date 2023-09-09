@@ -412,3 +412,30 @@ assertTrue('name filter reg-ex',
 		}
 	})({foo:{},bar:{}})
 );
+
+assertFalse('initAs',
+	()=>valueTest(jpath.all({
+		bar:Number,
+		foo:jpath.initAs(
+			{
+				x:Number,y:Number
+			},(v,n,p)=>({
+				x:p.bar*3,y:p.bar+3
+			})
+		)
+	},{bar:4,foo:{x:12,y:7}}))({bar:4})
+)
+
+assertTrue('initAs',
+	()=>valueTest(jpath.all({
+		bar:Number,
+		foo:jpath.initAs(
+			{
+				x:Number,y:Number
+			},(v,n,p)=>({
+				x:p.bar*3,y:p.bar+3
+			})
+		)
+	},{bar:4,foo:{x:12,y:5}}))({bar:4})
+)
+
