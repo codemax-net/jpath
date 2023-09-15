@@ -141,6 +141,27 @@ assertTrue('every object in the dataset has an id and an email string property',
 	)
 );
 
+console.group(FG_YELLOW,'empty, notEmpty, limit',FG_RESET);
+	assertFalse(()=>valueTest(jpath.empty(String))(''));
+	assertFalse(()=>valueTest(jpath.empty(Array))([]));
+	assertTrue(()=>valueTest(jpath.empty(String))([]));
+	assertTrue(()=>valueTest(jpath.empty(Array))(''));
+	
+	assertFalse(()=>valueTest(jpath.notEmpty(String))('abc'));
+	assertFalse(()=>valueTest(jpath.notEmpty(Array))([1,2,3]));
+	assertTrue(()=>valueTest(jpath.notEmpty(String))([1,2,3]));
+	assertTrue(()=>valueTest(jpath.notEmpty(Array))('abc'));	
+	
+	assertFalse(()=>valueTest(jpath.limit(String,1,3))('abc'));
+	assertFalse(()=>valueTest(jpath.limit(Array,1,3))([1,2,3]));
+	assertTrue(()=>valueTest(jpath.limit(String,1,2))([1,2,3]));
+	assertTrue(()=>valueTest(jpath.limit(Array,1,2))('abc'));		
+	
+	assertFalse(()=>valueTest(jpath.limit(Number,-3,3))(0));
+	assertTrue(()=>valueTest(jpath.limit(Number,0,3))(4));
+	
+console.groupEnd();
+
 assertFalse('every object in the dataset has an id and an email string property',
 	()=>valueTest({
 		'*':{

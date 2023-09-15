@@ -267,6 +267,22 @@ const notEmpty=(pattern)=>{
 	return (v,...args) => test(v,...args) || (v.length?0:`"${getPath(v,...args)}" should not be empty`);
 }
 
+const limit=(pattern,min,max)=>{
+	const test=valueTest(pattern);
+	if(test(min)||test(max)){//the pattern does not match numbers
+		//assume we are checking for either String or Array size
+		return (v,...args) => test(v,...args) || ((v.length>=min)&&(v.length<=max)?0
+			:`"${getPath(v,...args)}" is too big(${v.length}). Maximum length is ${maxLen}.`
+		);	
+	}else{
+		//
+		return (v,...args) => test(v,...args) || ((v>=min)&&(v <= max)?0:
+			`"${getPath(v,...args)}" min:${min}, max: ${min}.`
+		);
+	}
+}
+
+
 const key=(pattern=either(notEmpty(String),Number))=>{
 	const test=pattern && valueTest(pattern);
 	return (value,key,self,skey,parent,...ancestors)=> (test && test(value,key,self,skey,parent,...ancestors)) || 
@@ -373,6 +389,7 @@ if(typeof module != 'undefined'){
 		not			,
 		empty		,
 		notEmpty	,
+		limit		,
 		email		,
 		isoDate		,
 		testOrUpdate,
