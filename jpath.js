@@ -262,22 +262,30 @@ const empty=(pattern)=>{
 	return (v,...args) => test(v,...args) || (!v.length?0:`"${getPath(v,...args)}" must be empty`);
 }
 
-const notEmpty=(pattern)=>{
+const notEmpty=(pattern,maxLength)=>{
 	const test=valueTest(pattern);
-	return (v,...args) => test(v,...args) || (v.length?0:`"${getPath(v,...args)}" should not be empty`);
+	if(maxLength!==undefined){
+		return (v,...args) => test(v,...args) || ((v.length>0)&&(v.length<=maxLength)?0:`"${getPath(v,...args)}" should not be empty, max length: ${maxLength}`);		
+	}else{
+		return (v,...args) => test(v,...args) || (v.length?0:`"${getPath(v,...args)}" should not be empty`);		
+	};
 }
 
 const limit=(pattern,min,max)=>{
+	if(max === undefined){
+		max=min;
+		min=0;
+	};
 	const test=valueTest(pattern);
 	if(test(min)||test(max)){//the pattern does not match numbers
 		//assume we are checking for either String or Array size
 		return (v,...args) => test(v,...args) || ((v.length>=min)&&(v.length<=max)?0
-			:`"${getPath(v,...args)}" is too big(${v.length}). Maximum length is ${maxLen}.`
+			:`"${getPath(v,...args)}" min length:${min}, max length: ${max}.`
 		);	
 	}else{
 		//
 		return (v,...args) => test(v,...args) || ((v>=min)&&(v <= max)?0:
-			`"${getPath(v,...args)}" min:${min}, max: ${min}.`
+			`"${getPath(v,...args)}" min:${min}, max: ${max}.`
 		);
 	}
 }

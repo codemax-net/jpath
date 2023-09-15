@@ -149,16 +149,35 @@ console.group(FG_YELLOW,'empty, notEmpty, limit',FG_RESET);
 	
 	assertFalse(()=>valueTest(jpath.notEmpty(String))('abc'));
 	assertFalse(()=>valueTest(jpath.notEmpty(Array))([1,2,3]));
-	assertTrue(()=>valueTest(jpath.notEmpty(String))([1,2,3]));
-	assertTrue(()=>valueTest(jpath.notEmpty(Array))('abc'));	
+	assertTrue(()=>valueTest(jpath.notEmpty(String))(''));
+	assertTrue(()=>valueTest(jpath.notEmpty(Array))([]));	
+
+	assertFalse(()=>valueTest(jpath.notEmpty(String,3))('abc'));
+	assertFalse(()=>valueTest(jpath.notEmpty(Array,3))([1,2,3]));
+	assertTrue(()=>valueTest(jpath.notEmpty(String,2))('abc'));
+	assertTrue(()=>valueTest(jpath.notEmpty(Array,2))([1,2,3]));	
+
 	
 	assertFalse(()=>valueTest(jpath.limit(String,1,3))('abc'));
-	assertFalse(()=>valueTest(jpath.limit(Array,1,3))([1,2,3]));
-	assertTrue(()=>valueTest(jpath.limit(String,1,2))([1,2,3]));
-	assertTrue(()=>valueTest(jpath.limit(Array,1,2))('abc'));		
+	assertFalse(()=>valueTest(jpath.limit(Array,1,3))([1,2,3]));	
+	assertTrue(()=>valueTest(jpath.limit(String,1,2))('abc'));
+	assertTrue(()=>valueTest(jpath.limit(Array,1,2))([1,2,3]));		
+
+	assertFalse(()=>valueTest(jpath.limit(String,0,Infinity))(''));
+	assertFalse(()=>valueTest(jpath.limit(Array,0,Infinity))([]));
+	assertTrue(()=>valueTest(jpath.limit(String,1,Infinity))(''));
+	assertTrue(()=>valueTest(jpath.limit(Array,1,Infinity))([]));
+	
+	assertFalse(()=>valueTest(jpath.limit(String,3))('abc'));
+	assertFalse(()=>valueTest(jpath.limit(Array,3))([1,2,3]));	
+	assertTrue(()=>valueTest(jpath.limit(String,2))('abc'));
+	assertTrue(()=>valueTest(jpath.limit(Array,2))([1,2,3]));		
 	
 	assertFalse(()=>valueTest(jpath.limit(Number,-3,3))(0));
 	assertTrue(()=>valueTest(jpath.limit(Number,0,3))(4));
+
+	assertFalse(()=>valueTest(jpath.limit(Number,3))(2.5));
+	assertTrue(()=>valueTest(jpath.limit(Number,))(3.5));
 	
 console.groupEnd();
 
