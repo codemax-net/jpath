@@ -191,7 +191,7 @@ const valueTest=(pattern,errorMessage)=>{
             if(Array.isArray(pattern)){
                 let firstFilled=0,filledCount=0;pattern.forEach((x,i)=>(firstFilled||=i,filledCount++));
                 if(!filledCount){//e.g. foo=[], foo=[,,,], foo:Array(8),  the value must be an array with the same length as the empty array pattern
-                    return (v,...args) => Array.isArray(v) && (v.length==f.length)?0:`"${getPath(v,...args)}" must be an array of ${f.length} items`;  
+                    return (v,...args) => Array.isArray(v) && (v.length==pattern.length)?0:`"${getPath(v,...args)}" must be an array of ${pattern.length} items`;  
                 }else
                 if((firstFilled>1) && (firstFilled==pattern.length-1) && (filledCount==1)){//i.e.  foo:[,,X]  v must be an array of X
                     const itemTest=valueTest(pattern[2]);
