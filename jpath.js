@@ -186,7 +186,7 @@ const valueTest=(pattern,errorMessage)=>{
         case 'object'  :
             //console.log('oo',v,f);
             if(pattern instanceof RegExp){
-                return (v,...args) => pattern.test(v)?0:(`"${getPath(v,...args)}" "${v}" `+ (errorMessage|| `must match regular expression ${pattern}`));  
+                return (v,...args) =>((typeof v == 'string') && pattern.test(v))?0:(`"${getPath(v,...args)}" "${v}" `+ (errorMessage|| `must match regular expression ${pattern}`));  
             }else
             if(Array.isArray(pattern)){
                 let firstFilled=0,filledCount=0;pattern.forEach((x,i)=>(firstFilled||=i,filledCount++));
@@ -281,14 +281,15 @@ const limit=(pattern,min,max)=>{
 	};
 	const test=valueTest(pattern);
 	if(test(min)||test(max)){//the pattern does not match numbers
+		console.log('patt not matching numbers');
 		//assume we are checking for either String or Array size
 		return (v,...args) => test(v,...args) || ((v.length>=min)&&(v.length<=max)?0
-			:`"${getPath(v,...args)}" min length:${min}, max length: ${max}.`
+			:`"${getPath(v,...args)}" length:${v.length}, min length:${min}, max length: ${max}.`
 		);	
 	}else{
 		//
 		return (v,...args) => test(v,...args) || ((v>=min)&&(v <= max)?0:
-			`"${getPath(v,...args)}" min:${min}, max: ${max}.`
+			`"${getPath(v,...args)}":${+v} min:${min}, max: ${max}.`
 		);
 	}
 }
@@ -376,6 +377,9 @@ const emailStrict=/(?:[a-z0-9+!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}
 const emailSimple=/[^\s@]+@[^\s@]+\.[^\s@]+/;
 const email=(strict)=>valueTest(strict?emailStrict:emailSimple,'must be a valid email address');
 
+// allows parenthesis and dashes, accepts + in the beggining
+const phone=/^((((\(\+\d+\))|\+\d+)[\s-]*){0,1})(((\(\d+\))|\d+)[\s-]*)+$/;
+
 const isoDate=()=>{
 	return (v,...args)=> isNaN(new Date(v).valueOf())?`${getPath(v,...args)} "${v}" must be a valid date`:0;
 }
@@ -402,6 +406,7 @@ if(typeof module != 'undefined'){
 		notEmpty	,
 		limit		,
 		email		,
+		phone		,
 		isoDate		,
 		testOrUpdate,
 	};
