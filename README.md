@@ -70,7 +70,7 @@ expects the value to be a function
 
 ## Complex value tests
 ### matching arrays
-An array literal that starts with two empty items i.e. `[,,X]` defines an array that all its items are valid X  (where X is any value test definition)
+An array literal that starts with two empty items i.e. `[,,X]` defines an array that all its items are valid X  (where X is any value test definition)  
 Example:
 ```
     const dataValidator=valueTest([,,String]); 
@@ -83,8 +83,8 @@ Example:
     }
 ```
 
-Any other array literal defines an array that should match each defined test
-Example:
+Any other array literal defines an array that should match each defined test  
+Example:  
 ```
     const tableRowValidator=valueTest([String,Number,String]);
     const error=tableRowValidator(['a string',42,'another string']);
@@ -97,8 +97,8 @@ Example:
 
 
 ### matching objects
-An object literal defines an object validator
-Example:
+An object literal defines an object validator  
+Example:  
 ```
     const pointDef={x:Number,y:Number};
     const rectDef ={
@@ -119,7 +119,8 @@ The following property names of the object can be used to define name filters fo
   - `"/a|b|c/"` defines a name filter that matches all the properties of the target object described by the regular expression /a|b|c/
   - a backslash in the begining of the key is an escape character  
     e.g. `"\*"` defines the property "*", and  `"\foo,bar"` defines the property "foo,bar" 
-Example:
+
+Example:  
 ```
     const validator=valueTest({
         '*': {// all the properties of the test object should be objects
@@ -146,8 +147,8 @@ Example:
 
 ## Special type tests
 ### jpath.email([strict])
-Expects the value to be a valid email. When strict is truish then a more strict validation method is used
-For example:
+Expects the value to be a valid email. When strict is truish then a more strict validation method is used  
+For example:  
 ```
     const emailTest=valueTest({
         name    :String,
@@ -168,8 +169,8 @@ Expects the value to be a valid phone number.
 Expects the value to be a valid iso date string
 
 ### jpath.ID()
-Forces the value to be an ID property.
-For example:
+Forces the value to be an ID property.  
+For example:  
 ```
     const datasetValidator=valueTest({
         '*':{
@@ -188,8 +189,8 @@ For example:
 ```
 
 ### jpath.key()
-Expects the value to be an ID property, but does not enforce any changes on the target object
-For example:
+Expects the value to be an ID property, but does not enforce any changes on the target object  
+For example:  
 ```
     const datasetValidator=valueTest({
         '*':{
@@ -209,8 +210,8 @@ For example:
 
 ## Composite value tests
 ### jpath.either(a,b,c,...)
-Expects any of the defined tests to validate the target 
-Example:
+Expects any of the defined tests to validate the target   
+Example:  
 ```
     const validator=valueTest({
         'name': jpath.either(undefined, String, {first:String,last:String})
@@ -222,8 +223,8 @@ Example:
 ```
 
 ### jpath.all(a,b,c,...)
-Expects all of the defined tests to validate the target
-Example:
+Expects all of the defined tests to validate the target  
+Example:  
 ```
     const validateMatrix=jpath.all(Array(3),[,,jpath.all([,,Number])]);//defines a 3x3 matrix
     console.log(validateMatrix([[0,1,2],[3,4,5],[6,7,8]]));//should print 0
@@ -231,8 +232,8 @@ Example:
 ```
 
 ### jpath.empty([String|Array])
-Expects the value to be empty
-Example
+Expects the value to be empty  
+Example:  
 ```
     console.log(jpath.empty(String)('')); //should print 0
     console.log(jpath.empty(String)('foo')); //should print an error message
@@ -247,14 +248,14 @@ Example
 
 ### jpath.notEmpty(pattern,[maxLength])
 Expects a not empty value that matches the pattern
-When maxLength is defined the value should have at most maxLength items
-For example:
+When maxLength is defined the value should have at most maxLength items  
+For example:  
  - `jpath.notEmpty(String,10)`  defines a not empty string of 10 characters at most
  - `jpath.notEmpty([,,Number],10)` defines a not empty array of 10 numbers at most
 
 ### jpath.limit(pattern,[min],max)
-Expects a value within the defined boundaries
-For example:
+Expects a value within the defined boundaries  
+For example:  
  - `jpath.limit(String,2,10)`  defines a string from 2 to 10 characters
  - `jpath.limit([,,Number],10)` defines an array of at most 10 numbers
  - `jpath.limit(Number,-10,10)`  defines a number from -10 to 10
