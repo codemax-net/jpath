@@ -10,12 +10,13 @@ const datasetValidator=jpath.valueTest({//the users is an object
     '*':{//each entry is a user
         id:jpath.ID(),                         //id is a key (i.e users[someuser.id]==someuser),
         email:jpath.email(),                    //email should be a valid email string
+        name :jpath.limit(String,4,32),         //name must be a string from 4 to 32 characters        
         isAdmin:jpath.either(undefined,true),   //isAdmin can be either undefined or otherwise true
         inbox:[,,{//the inbox is an array of messages as described here
-            sender      :jpath.notEmpty(String),    //sender must be an non-empty string
-            timestamp   :jpath.isoDate(),           //timestamp must be a valid date
-            messageBody :String,                    //messageBody must be a string
-            markedAsRead:Boolean                    //markedAsRead must be a Boolean
+            sender   :jpath.notEmpty(String),    //sender must be an non-empty string
+            timestamp:jpath.isoDate(),           //timestamp must be a valid date
+            message  :jpath.either(undefined,jpath.notEmpty(String,1024)),//message can be either undefined, or a string of max 1024 characters
+            markedAsRead:Boolean//markedAsRead must be a Boolean
         }]
     }
 });
@@ -24,12 +25,14 @@ const users={
     'admin':{
         id:'admin',
         email:'foo@bar.com',
+        name :'tom tom',
         isAdmin:true,
         inbox:[]
     },
     'mark':{
         id:'mark',
         email:'mark@boo.net',
+        name :'mark smith',
         inbox:[{
             sender:'admin',
             timestamp: new Date().toISOString(),
@@ -248,3 +251,11 @@ When maxLength is defined the value should have at most maxLength items
 For example:
  - `jpath.notEmpty(String,10)`  defines a not empty string of 10 characters at most
  - `jpath.notEmpty([,,Number],10)` defines a not empty array of 10 numbers at most
+
+### jpath.limit(pattern,[min],max)
+Expects a value within the defined boundaries
+For example:
+ - `jpath.limit(String,2,10)`  defines a string from 2 to 10 characters
+ - `jpath.limit([,,Number],10)` defines an array of at most 10 numbers
+ - `jpath.limit(Number,-10,10)`  defines a number from -10 to 10
+
