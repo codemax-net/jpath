@@ -385,6 +385,13 @@ assertTrue('Sealed test(some of the properties are not validated)',
 	})(dataset)
 );
 
+assertTrue('Sealed test(some of the properties are not validated)',
+	()=>valueTest({
+		[jpath.sealed]:(notValidatedKeys,...args)=>`${notValidatedKeys.join(',')} can not be present in ${jpath.getPath(...args)}`,
+		'admin':Object
+	})(dataset,'dataset')
+);
+
 assertTrue('Empty string key(error)',
 	()=>valueTest({
 		'*':{

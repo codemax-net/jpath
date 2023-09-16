@@ -100,7 +100,7 @@ const nameToFilter=(pattern)=>{
 /*special property for testing "Sealed" Objects, i.e. all their properties must be validated by one of the patterns.
 	e.g. the valueTest below validates object with exactly the foo and bar string properties 
 	{
-		[jpath.sSealed]:true,
+		[jpath.sealed]:true,
 		/foo|bar/:String,
 	}
 */
@@ -234,6 +234,9 @@ const valueTest=(pattern,errorMessage)=>{
 							};
 							return err;
 						}));
+						if(!error && notValidatedKeys.size && (typeof pattern[sSealed]=='function')){
+							return pattern[sSealed]([...notValidatedKeys],v,...args);
+						};
 						return error || (notValidatedKeys.size && `"${getPath(v,...args)}/${[...notValidatedKeys][0]}" is not allowed! Object is sealed.'}`);
 					}else{
 						return nameValueTests[sFirstError](test => test.name(keys)[sFirstError](key =>
