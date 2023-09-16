@@ -103,7 +103,7 @@ console.group(FG_YELLOW,'primitive jpath test',FG_RESET);
 	assertTrue(()=>valueTest(null)(undefined)		);	
 console.groupEnd();
 
-console.group(FG_YELLOW,'date jpath test',FG_RESET);
+console.group(FG_YELLOW,'date, email, phone jpath test',FG_RESET);
 	assertFalse(
 		()=>valueTest(jpath.isoDate())(new Date().toISOString())
 	);
@@ -118,6 +118,23 @@ console.group(FG_YELLOW,'date jpath test',FG_RESET);
 
 	assertTrue(
 		()=>valueTest(jpath.isoDate())('this is not a date')
+	);
+	
+	assertFalse(
+		()=>valueTest(jpath.email())('foo@boo.bar')
+	);
+	assertFalse(
+		()=>valueTest(jpath.email('strict'))('foo@boo.bar')
+	);
+	assertTrue(
+		()=>valueTest(jpath.email('strict'))('fo^o@b!oo.bar')
+	);
+	
+	assertFalse(
+		()=>valueTest([,,jpath.phone()])(['+11(0123)456 789','+11 (0123)-456-789','+11 0123 456-789','(0123)(456)(789)'])
+	);
+	assertTrue(
+		()=>valueTest(jpath.phone())('not a phone')
 	);
 console.groupEnd();
 
