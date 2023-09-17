@@ -11,7 +11,7 @@ const jpath=require('jpath');
 
 const datasetValidator=jpath.valueTest({//should be an object
     '*':{//each entry is a user
-        id:jpath.ID(),                          //id is a key (i.e users[someuser.id]==someuser),
+        id:jpath.ID(),                          //id is an ID property (i.e users[someuser.id]==someuser),
         email:jpath.email(),                    //email should be a valid email string
         name :jpath.limit(String,4,32),         //name must be a string from 4 to 32 characters        
         isAdmin:jpath.either(undefined,true),   //isAdmin can be either undefined or otherwise true
