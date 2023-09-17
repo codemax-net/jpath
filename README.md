@@ -280,9 +280,12 @@ For example:
 ### jpath.limit(pattern,[min],max)
 Expects a value within the defined boundaries  
 For example:  
- - `jpath.limit(String,2,10)`  defines a string from 2 to 10 characters
- - `jpath.limit([,,Number],10)` defines an array of at most 10 numbers
- - `jpath.limit(Number,-10,10)`  defines a number from -10 to 10
+ - `jpath.limit(String,2,10)`     defines a string from 2 to 10 characters
+ - `jpath.limit([,,Number],10)`   defines an array of at most 10 numbers
+ - `jpath.limit(Number,-10,10)`   defines a number from -10 to 10
+ - `jpath.limit(Number,100)`      defines a number <= 100
+ - `jpath.limit(Date,new Date())` defines a date until now
+ - `jpath.limit(Date,new Date(),Infinity)` defines a date from now to infinity
 
 ## Custom value tests
 Essentially a value test is a function of the form `(v0,k0,v1,k1,v2,k2,....) => error message or null`  
