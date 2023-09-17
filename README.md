@@ -1,16 +1,19 @@
 # jpath
-## installation
+
+An intuitive library that enables JS object validation and filtering using native javascript descriptors
+
+## Installation
 `npm install git+https://s3.codemax.net/metaxas/jpath.git`
 
-# example usage
+# Example usage
 ```
 const jpath=require('jpath');
 
-const datasetValidator=jpath.valueTest({//the users is an object
+const datasetValidator=jpath.valueTest({//should be an object
     '*':{//each entry is a user
-        id:jpath.ID(),                         //id is a key (i.e users[someuser.id]==someuser),
+        id:jpath.ID(),                          //id is an ID property (i.e users[someuser.id]==someuser),
         email:jpath.email(),                    //email should be a valid email string
-        name :jpath.limit(String,4,32),         //name must be a string from 4 to 32 characters        
+        name :jpath.limit(/^[a-zA-Z ]+$/,4,32), //name must be a string from 4 to 32 characters, matching the specified regular expression
         isAdmin:jpath.either(undefined,true),   //isAdmin can be either undefined or otherwise true
         inbox:[,,{//the inbox is an array of messages as described here
             sender   :jpath.notEmpty(String),    //sender must be an non-empty string
@@ -21,7 +24,7 @@ const datasetValidator=jpath.valueTest({//the users is an object
     }
 });
 
-const users={
+const dataset={
     'admin':{
         id:'admin',
         email:'foo@bar.com',
@@ -42,7 +45,7 @@ const users={
     }
 }
 
-const error=datasetValidator(users);
+const error=datasetValidator(dataset);
 if(error){
     console.log(error);
 }else{
@@ -51,7 +54,7 @@ if(error){
 
 ```
 
-## simple value tests
+## Simple value tests
 ### String    
 Expects the value to be a **string**
 for example:
@@ -277,9 +280,12 @@ For example:
 ### jpath.limit(pattern,[min],max)
 Expects a value within the defined boundaries  
 For example:  
- - `jpath.limit(String,2,10)`  defines a string from 2 to 10 characters
- - `jpath.limit([,,Number],10)` defines an array of at most 10 numbers
- - `jpath.limit(Number,-10,10)`  defines a number from -10 to 10
+ - `jpath.limit(String,2,10)`     defines a string from 2 to 10 characters
+ - `jpath.limit([,,Number],10)`   defines an array of at most 10 numbers
+ - `jpath.limit(Number,-10,10)`   defines a number from -10 to 10
+ - `jpath.limit(Number,100)`      defines a number <= 100
+ - `jpath.limit(Date,new Date())` defines a date until now
+ - `jpath.limit(Date,new Date(),Infinity)` defines a date from now to infinity
 
 ## Custom value tests
 Essentially a value test is a function of the form `(v0,k0,v1,k1,v2,k2,....) => error message or null`  
