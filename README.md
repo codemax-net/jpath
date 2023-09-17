@@ -373,7 +373,20 @@ The value of jpath.sealed can also be a callback function `(notValidatedKeys,v0,
     console.log(sealedValidator({x:1,y:2,z:3,type:'3d point'}));
 ```
 
+## Custom name filters
+You can define custom name filters using the helper function `nameFilter`:  
 
+```
+    const validator=valueTest({
+        [jpath.nameFilter((name,index)=>index==0)]:String,//the first enumerated property should have a string value
+        [jpath.nameFilter((name,index)=>index!=0)]:Number,//all the rest should be numbers
+    });
+
+    console.log(validator(['a string',1,2,3]));//should print 0
+    console.log(validator({name:'a string',x:1,y:2}));//should print 0
+    console.log(validator([0,1,2,3]));//should print an error message
+    console.log(validator({x:1,y:2,name:'a string'}));//should print an error message
+``` 
 
 
 
