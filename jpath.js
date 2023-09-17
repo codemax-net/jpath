@@ -169,6 +169,7 @@ const valueTest=(pattern,errorMessage)=>{
                 case Boolean :return (v,...args) => (typeof v == 'boolean') ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a boolean'}`);
                 case Object  :return (v,...args) => (typeof v == 'object')  ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be an object'}`);
 				case Function:return (v,...args) => (typeof v == 'function')?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a function'}`);
+				case Date 	 :return (v,...args) => (!isNaN(new Date(v).valueOf()))?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a valid date/time'}`);
                 case Array   :return (v,...args) => Array.isArray(v)		?0:(`"${getPath(v,...args)}" ${errorMessage||'must be an array'}`);
                 default:
 					if(errorMessage){
@@ -286,15 +287,22 @@ const limit=(pattern,min,max)=>{
 		min=0;
 	};
 	const test=valueTest(pattern);
-	if(test(min)||test(max)){//the pattern does not match numbers
+	let e;
+	if((max!==Infinity) && ((test(min)||test(max)))){//the pattern matches neither numbers nor dates
 		//assume we are checking for either String or Array size
 		return (v,...args) => test(v,...args) || ((v.length>=min)&&(v.length<=max)?0
 			:`"${getPath(v,...args)}" length:${v.length}, min length:${min}, max length: ${max}.`
 		);	
-	}else{
-		//
+	}else
+	if(test(new Date(min)) && test(new Date(max))){//the pattern does not match dates
 		return (v,...args) => test(v,...args) || ((v>=min)&&(v <= max)?0:
-			`"${getPath(v,...args)}":${+v} min:${min}, max: ${max}.`
+			`"${getPath(v,...args)}" min value:${min}, max value: ${max}.`
+		);
+	}else{
+		const minStr=!min?'':`min date:${new Date(min).toISOString()}`;
+		const maxStr=(max===Infinity)?'':`max date:${new Date(max).toISOString()}`;
+		return (v,...args) => test(v,...args) || ((v>=min)&&(v <= max)?0:
+			`"${getPath(v,...args)}" ${minStr} ${maxStr}.`
 		);
 	}
 }
@@ -388,8 +396,9 @@ const phone=(options)=>{
 	return	valueTest(phoneRegEx,'must be a valid phone number');
 }
 
+const isoDateRegEx=/(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+){0,1}){0,1}([+-][0-2]\d:[0-5]\d|Z))/;
 const isoDate=()=>{
-	return (v,...args)=> isNaN(new Date(v).valueOf())?`${getPath(v,...args)} "${v}" must be a valid date`:0;
+	return (v,...args)=> isNaN(new Date(v).valueOf())?`${getPath(v,...args)} "${v}" must be a valid iso time stamp`:0;
 }
 
 if(typeof module != 'undefined'){

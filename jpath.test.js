@@ -196,6 +196,14 @@ console.group(FG_YELLOW,'empty, notEmpty, limit',FG_RESET);
 	assertFalse(()=>valueTest(jpath.limit(Number,3))(2.5));
 	assertTrue(()=>valueTest(jpath.limit(Number,))(3.5));
 	
+	assertFalse(()=>valueTest(jpath.limit(Date,new Date()))(new Date(Date.now()-24*60*60*1000)));
+	assertTrue(()=>valueTest(jpath.limit(Date,new Date()))(new Date(Date.now()+24*60*60*1000)));
+	assertFalse(()=>valueTest(jpath.limit(Date,Date.now()))(new Date(Date.now()-24*60*60*1000)));
+	assertTrue(()=>valueTest(jpath.limit(Date,Date.now()))(new Date(Date.now()+24*60*60*1000)));
+
+	assertFalse(()=>jpath.limit(Date,new Date(),Infinity)(new Date(Date.now()+24*60*60*1000)));
+	assertTrue(()=>jpath.limit(Date,new Date(),Infinity)(new Date(Date.now()-24*60*60*1000)));
+		
 console.groupEnd();
 
 assertFalse('every object in the dataset has an id and an email string property',
