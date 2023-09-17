@@ -286,13 +286,13 @@ Essentially a value test is a function of the form `(v0,k0,v1,k1,v2,k2,....) => 
 The parameters of the value test function define the ancestor path of the value v0, i.e.:  
   `v0===v1[k0]`, `v1===v2[k1]`, ... or  
   `v0=vn[kn-1]...[k2][k1][k0]`
-### basic example of custom value test
+### Basic example of a custom value test
 In the example below we define a validator for a lookup value using a custom value test:
 ```
     const datasetValidator=valueTest({
         words:[,,/^\w+$/], //an array of words
         phrases:{
-            '*':[,,(word,wordIndex,phraseArray,phraseId,phrases,phrasesId,dataset)=>{
+            '*':[,,(word,wordIndex,phraseArray,phraseId,phrases,phrasesId,dataset)=>{//our custom validator
                 if(dataset.words.includes(word)){
                     return 0;
                 }else{
@@ -311,7 +311,7 @@ In the example below we define a validator for a lookup value using a custom val
     }));//should print the error message 'The word "yellow" must be one of car,bike,blue,red,big,small' 
 
 ```
-### helper functions for writing custom value tests
+### Helper functions for writing custom value tests
 The following functions can be used to extract the components of the value test arguments 
   - `getKeys`      , returns only the keys k0,k1,... of the arguments 
   - `getPathKeys`  , returns only the keys but in reverse order, i.e. kN-1,...k2,k1,k0
@@ -326,13 +326,14 @@ We can rewrite the previous validator for example as:
     const datasetValidator=valueTest({
         words:[,,/^\w+$/], //an array of words
         phrases:{
-            '*':[,,(word,index,...rest)=>{
-                const dataset =jpath.getRoot(...rest);
-                const wordPath=jpath.getPath(word,index,...rest);
+            '*':[,,(...args)=>{//our custom validator
+                const [word,phrase]=jpath.getValues(...args);
+                const dataset =jpath.getRoot(...args);
+                const wordPath=jpath.getPath(...args);
                 if(dataset.words.includes(word)){
                     return 0;
                 }else{
-                    return `The word "${word}" defined in ${wordPath} must be one of ${dataset.words.join(',')}`;
+                    return `Bad phrase "${phrase.join(' ')}"!\nThe word "${word}"  ${wordPath} must be one of ${dataset.words.join(',')}`;
                 };
             }]
         }
@@ -344,7 +345,7 @@ We can rewrite the previous validator for example as:
             'phrase1':['blue','car'], 
             'phrase2':['yellow','boat']
         }
-    }));//should print the error message 'The word "yellow" must be one of car,bike,blue,red,big,small' 
+    }));//should print the error message 'Bad phrase "yellow boat"! The word "yellow" defined in /phrases/phrase2/0 must be one of car,bike,blue,red,big,small' 
 
 
 ```
