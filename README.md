@@ -145,6 +145,21 @@ Example:
     };
 ```
 
+## Using regular expressions as value test specifiers
+Example:
+```
+    const fileValidator=valueTest({
+        fileName:/^[^\/]+$/,            //valid linux fileName
+        fileMods:/^(r|-)(w|-)(x|-)$/    //linux file permissions
+    });
+    const error=fileValidator({fileName:'my-file',fileMods:'r--'});
+    if(error){
+        console.log('Invalid file descriptor:',error)
+    }else{
+        console.log('All good');
+    }
+```
+
 ## Special type tests
 ### jpath.email([strict])
 Expects the value to be a valid email. When strict is truish then a more strict validation method is used  
@@ -188,24 +203,26 @@ For example:
     console.log(dataset.tom);//should print "{ email: 'tom@foo.bar', id: 'tom' }"
 ```
 
-### jpath.key()
+### jpath.key([pattern])
 Expects the value to be an ID property, but does not enforce any changes on the target object  
 For example:  
 ```
     const datasetValidator=valueTest({
         '*':{
-            id   : jpath.key(),
+            id   : jpath.key(/^obj\d+$/),
             email: jpath.email()
         }
     });
     const dataset={
-        'tom':{
-            id   : 'timTamTom'
+        'obj1':{
+            id   : 'obj2',
             email: 'tom@foo.bar'
         }
     };
     const error=datasetValidator(dataset);
     console.log(error);//should print an error message ("/tom/id must be an identity property")
+
+
 ```
 
 ## Composite value tests
@@ -231,7 +248,7 @@ Example:
     console.log(validateMatrix([[0,1,2],[3,4,5]]));//should print an error message
 ```
 
-### jpath.empty([String|Array])
+### jpath.empty([String|Array|Object])
 Expects the value to be empty  
 Example:  
 ```
@@ -241,8 +258,12 @@ Example:
     console.log(jpath.empty(Array)([])); //should print 0
     console.log(jpath.empty(Array)([1,2,3])); //should print an error message
 
+    console.log(jpath.empty(Object)({})); //should print 0
+    console.log(jpath.empty(Object)({foo:1})); //should print an error message
+
     console.log(jpath.empty()([])); //should print 0
     console.log(jpath.empty()('')); //should print 0
+    console.log(jpath.empty()({})); //should print 0
 
 ```
 
@@ -259,4 +280,74 @@ For example:
  - `jpath.limit(String,2,10)`  defines a string from 2 to 10 characters
  - `jpath.limit([,,Number],10)` defines an array of at most 10 numbers
  - `jpath.limit(Number,-10,10)`  defines a number from -10 to 10
+
+## Custom value tests
+Essentially a value test is a function of the form `(v0,k0,v1,k1,v2,k2,....) => error message or null`  
+The parameters of the value test function define the ancestor path of the value v0, i.e.:  
+  `v0===v1[k0]`, `v1===v2[k1]`, ... or  
+  `v0=vn[kn-1]...[k2][k1][k0]`
+### basic example of custom value test
+In the example below we define a validator for a lookup value using a custom value test:
+```
+    const datasetValidator=valueTest({
+        words:[,,/^\w+$/], //an array of words
+        phrases:{
+            '*':[,,(word,wordIndex,phraseArray,phraseId,phrases,phrasesId,dataset)=>{
+                if(dataset.words.includes(word)){
+                    return 0;
+                }else{
+                    return `The word "${word}" must be one of ${dataset.words.join(',')}`;
+                };
+            }]
+        }
+    });
+
+    console.log(datasetValidator({
+        words:['car','bike','blue','red','big','small'],
+        phrases:{
+            'phrase1':['blue','car'], 
+            'phrase2':['yellow','boat']
+        }
+    }));//should print the error message 'The word "yellow" must be one of car,bike,blue,red,big,small' 
+
+```
+### helper functions for writing custom value tests
+The following functions can be used to extract the components of the value test arguments 
+  - `getKeys`      , returns only the keys k0,k1,... of the arguments 
+  - `getPathKeys`  , returns only the keys but in reverse order, i.e. kN-1,...k2,k1,k0
+  - `getValues`    , returns only the values v0,v1... 
+  - `getPathValues`, returns only the values but in reverse order i.e. vN-1,...v2,v1,v0 
+  - `getRoot`      , returns the root value (i.e. the dataset tested)
+  - `getPath`      , returns a string describing the path of v0
+
+We can rewrite the previous validator for example as:
+```
+
+    const datasetValidator=valueTest({
+        words:[,,/^\w+$/], //an array of words
+        phrases:{
+            '*':[,,(word,index,...rest)=>{
+                const dataset =jpath.getRoot(...rest);
+                const wordPath=jpath.getPath(word,index,...rest);
+                if(dataset.words.includes(word)){
+                    return 0;
+                }else{
+                    return `The word "${word}" defined in ${wordPath} must be one of ${dataset.words.join(',')}`;
+                };
+            }]
+        }
+    });
+
+    console.log(datasetValidator({
+        words:['car','bike','blue','red','big','small'],
+        phrases:{
+            'phrase1':['blue','car'], 
+            'phrase2':['yellow','boat']
+        }
+    }));//should print the error message 'The word "yellow" must be one of car,bike,blue,red,big,small' 
+
+
+```
+
+
 
