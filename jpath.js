@@ -262,7 +262,13 @@ const not=(pattern, errorMessage)=>{
 
 const empty=(pattern)=>{
 	const test=valueTest(pattern);
-	return (v,...args) => test(v,...args) || (!v.length?0:`"${getPath(v,...args)}" must be empty`);
+	if(test({})){//the pattern does not match objects
+		console.log('empty using length');
+		return (v,...args) => test(v,...args) || (!v.length?0:`"${getPath(v,...args)}" must be empty`);	
+	}else{
+		console.log('empty using keys');
+		return (v,...args) => test(v,...args) || (!Object.keys(v).length?0:`"${getPath(v,...args)}" must be empty`);
+	}	
 }
 
 const notEmpty=(pattern,maxLength)=>{
