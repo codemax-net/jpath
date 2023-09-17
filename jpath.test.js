@@ -53,12 +53,15 @@ function assertTrue(title,fn){
 		title='';
 	};
 	const ret=fn();
-	console.log(FG_YELLOW,title||'');
+	console.log('');
+	if(title){
+		console.log(FG_YELLOW,title);		
+	};
 	if(!ret){
-		console.log(FG_RED,'assertTrue',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,ret,FG_RESET);
+		console.log(FG_RED,'assertTrue',FG_RESET,fn.toString(), '\n',FG_RED,'failed',FG_RED,ret,FG_RESET);
 		process.exit(-1);
 	}else{
-		console.log(FG_GREEN,'assertTrue',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT, ret, FG_RESET);
+		console.log(FG_GREEN,'assertTrue',FG_RESET,fn.toString(), '\n',FG_GREEN,'passed',FG_YELLOW_BRIGHT, ret, FG_RESET);
 	}
 }
 function assertFalse(title,fn){
@@ -67,12 +70,15 @@ function assertFalse(title,fn){
 		title='';
 	};
 	const err=fn();
-	console.log(FG_YELLOW,title||'');
+	console.log('');
+	if(title){
+		console.log(FG_YELLOW,title);		
+	};
 	if(err){
-		console.log(FG_RED,'assertFalse',FG_RESET,fn.toString(), '\n\t','failed',FG_RED,err,FG_RESET);
+		console.log(FG_RED,'assertFalse',FG_RESET,fn.toString(), '\n',FG_RED,'failed',FG_RED,err,FG_RESET);
 		process.exit(-1);
 	}else{
-		console.log(FG_GREEN,'assertFalse',FG_RESET,fn.toString(), '\n\t','passed',FG_YELLOW_BRIGHT,err,FG_RESET);
+		console.log(FG_GREEN,'assertFalse',FG_RESET,fn.toString(), '\n',FG_GREEN,'passed',FG_YELLOW_BRIGHT,err,FG_RESET);
 	}
 }
 
@@ -104,6 +110,16 @@ console.group(FG_YELLOW,'primitive jpath test',FG_RESET);
 console.groupEnd();
 
 console.group(FG_YELLOW,'date, email, phone jpath test',FG_RESET);
+	assertFalse(
+		()=>valueTest(Date)(new Date().toDateString())
+	);
+	assertFalse(
+		()=>valueTest(Date)(Date.now())
+	);	
+	assertTrue(
+		()=>valueTest(Date)('not a date')
+	);	
+	
 	assertFalse(
 		()=>valueTest(jpath.isoDate())(new Date().toISOString())
 	);
