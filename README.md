@@ -1,14 +1,17 @@
 # jpath
-## installation
+
+An intuitive library that enables JS object validation and filtering using native javascript descriptors
+
+## Installation
 `npm install git+https://s3.codemax.net/metaxas/jpath.git`
 
-# example usage
+# Example usage
 ```
 const jpath=require('jpath');
 
-const datasetValidator=jpath.valueTest({//the users is an object
+const datasetValidator=jpath.valueTest({//should be an object
     '*':{//each entry is a user
-        id:jpath.ID(),                         //id is a key (i.e users[someuser.id]==someuser),
+        id:jpath.ID(),                          //id is a key (i.e users[someuser.id]==someuser),
         email:jpath.email(),                    //email should be a valid email string
         name :jpath.limit(String,4,32),         //name must be a string from 4 to 32 characters        
         isAdmin:jpath.either(undefined,true),   //isAdmin can be either undefined or otherwise true
@@ -21,7 +24,7 @@ const datasetValidator=jpath.valueTest({//the users is an object
     }
 });
 
-const users={
+const dataset={
     'admin':{
         id:'admin',
         email:'foo@bar.com',
@@ -42,7 +45,7 @@ const users={
     }
 }
 
-const error=datasetValidator(users);
+const error=datasetValidator(dataset);
 if(error){
     console.log(error);
 }else{
@@ -51,7 +54,7 @@ if(error){
 
 ```
 
-## simple value tests
+## Simple value tests
 ### String    
 Expects the value to be a **string**
 for example:
