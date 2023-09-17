@@ -60,16 +60,16 @@ for example:
 ### Number    
 Expects the value to be a **number**
 ### Boolean   
-expects the value to be either **true** or **false**
+Expects the value to be either **true** or **false**
 ### Object    
-expects the value to be an object
+Expects the value to be an object
 ### Array     
-expects the value to be an array
+Expects the value to be an array
 ### Function  
-expects the value to be a function
+Expects the value to be a function
 
 ## Complex value tests
-### matching arrays
+### Array tests
 An array literal that starts with two empty items i.e. `[,,X]` defines an array that all its items are valid X  (where X is any value test definition)  
 Example:
 ```
@@ -96,7 +96,7 @@ Example:
 ```
 
 
-### matching objects
+### Object tests
 An object literal defines an object validator  
 Example:  
 ```
@@ -309,7 +309,6 @@ In the example below we define a validator for a lookup value using a custom val
             'phrase2':['yellow','boat']
         }
     }));//should print the error message 'The word "yellow" must be one of car,bike,blue,red,big,small' 
-
 ```
 ### Helper functions for writing custom value tests
 The following functions can be used to extract the components of the value test arguments 
@@ -322,7 +321,6 @@ The following functions can be used to extract the components of the value test 
 
 We can rewrite the previous validator for example as:
 ```
-
     const datasetValidator=valueTest({
         words:[,,/^\w+$/], //an array of words
         phrases:{
@@ -346,9 +344,36 @@ We can rewrite the previous validator for example as:
             'phrase2':['yellow','boat']
         }
     }));//should print the error message 'Bad phrase "yellow boat"! The word "yellow" defined in /phrases/phrase2/0 must be one of car,bike,blue,red,big,small' 
+```
 
+## Sealed objects
+By default an object validator tests the target object using the defined name/value tests.  
+It can be however that we want the validator to return an error if an object contains any property which does not pass validation.  
+This can be achieved using the special name filter `jpath.sealed`:  
+```
+    const normalValidator=valueTest({'x,y':Number});
+    const sealedValidator=valueTest({'x,y':Number,[jpath.sealed]:true});
+
+    console.log(normalValidator({x:1,y:2,z:3}));//should print 0
+    console.log(sealedValidator({x:1,y:2,z:3}));//should print an error message because the property z does not pass validation
+``` 
+
+The value of jpath.sealed can also be a callback function `(notValidatedKeys,v0,k0,v1,k1....)=> error message`:
 
 ```
+    const sealedValidator=valueTest({
+        'x,y':Number,
+        [jpath.sealed]:(notValidatedKeys,point)=>{
+            console.warn(`The following properties will be deleted:${notValidatedKeys.join(',')}`);
+            notValidatedKeys.forEach(key=>delete point[key]);
+            console.warn('The object is modified to',point);
+            return 0;
+        }
+    });
+    console.log(sealedValidator({x:1,y:2,z:3,type:'3d point'}));
+```
+
+
 
 
 
