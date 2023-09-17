@@ -13,7 +13,7 @@ const datasetValidator=jpath.valueTest({//should be an object
     '*':{//each entry is a user
         id:jpath.ID(),                          //id is an ID property (i.e users[someuser.id]==someuser),
         email:jpath.email(),                    //email should be a valid email string
-        name :jpath.limit(String,4,32),         //name must be a string from 4 to 32 characters        
+        name :jpath.limit(/^[a-zA-Z ]+$/,4,32), //name must be a string from 4 to 32 characters, matching the specified regular expression
         isAdmin:jpath.either(undefined,true),   //isAdmin can be either undefined or otherwise true
         inbox:[,,{//the inbox is an array of messages as described here
             sender   :jpath.notEmpty(String),    //sender must be an non-empty string
