@@ -1,5 +1,5 @@
 {
-  "name": "jpath",
+  "name": "@codemax/jpath",
   "version": "1.1.5",
   "description": "jpathTest",
   "main": "jpath.js",
