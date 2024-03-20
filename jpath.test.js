@@ -190,6 +190,17 @@ console.group(FG_YELLOW,'empty, notEmpty, limit',FG_RESET);
 	assertTrue(()=>valueTest(jpath.notEmpty(String,2))('abc'));
 	assertTrue(()=>valueTest(jpath.notEmpty(Array,2))([1,2,3]));	
 
+	//notEmpty without param => automatic not empty based on value type
+	assertTrue(()=>valueTest(jpath.notEmpty())([]));
+	assertTrue(()=>valueTest(jpath.notEmpty())({}));
+	assertTrue(()=>valueTest(jpath.notEmpty())(''));
+	assertTrue(()=>valueTest(jpath.notEmpty())(undefined));
+	assertTrue(()=>valueTest(jpath.notEmpty())(null));
+	
+	assertFalse(()=>valueTest(jpath.notEmpty())([{}]));
+	assertFalse(()=>valueTest(jpath.notEmpty())({'':''}));
+	assertFalse(()=>valueTest(jpath.notEmpty())('x'));
+	assertFalse(()=>valueTest(jpath.notEmpty())(0));
 	
 	assertFalse(()=>valueTest(jpath.limit(String,1,3))('abc'));
 	assertFalse(()=>valueTest(jpath.limit(Array,1,3))([1,2,3]));	

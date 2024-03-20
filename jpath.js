@@ -273,6 +273,27 @@ const empty=(pattern)=>{
 }
 
 const notEmpty=(pattern,maxLength)=>{
+	if(!pattern){
+		return ((v,...args)=>{
+			if((v!==undefined)&&(v!==null)){
+				switch(typeof v){
+					case 'string':
+						if(v){
+							return 0;
+						};
+						break;
+					case 'object':
+						if(Array.isArray(v)?v.length:Object.keys(v).length){
+							return 0
+						};
+						break;
+					default		 : 
+						return 0;
+				};
+			};
+			return `"${getPath(v,...args)}" should be defined and not empty`;
+		});
+	};
 	const test=valueTest(pattern);
 	if(maxLength!==undefined){
 		return (v,...args) => test(v,...args) || ((v.length>0)&&(v.length<=maxLength)?0:`"${getPath(v,...args)}" should not be empty, max length: ${maxLength}`);		
