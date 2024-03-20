@@ -564,3 +564,33 @@ assertFalse(
 assertTrue(
 	()=>valueTest(Array(4))([1,2,3,4,5])
 );
+
+
+const books=[
+	{
+		"title":"1984",
+		"author":"George Orwell",
+		"publicationYear":1949,
+		"genre":["Dystopian Fiction","Political Fiction"],
+		"synopsis":"In a totalitarian future society, \"1984\" explores the life of Winston Smith as he grapples with the oppressive Party led by Big Brother. The novel delves into themes of surveillance, thought control, and the consequences of absolute power on individual freedom.",
+		"image":"https://api.bruna.nl/images/active/carrousel/fullsize/9780141036144_front.jpg",
+		"id":1
+	},
+	{"title":"Pride and Prejudice","author":"Jane Austen","publicationYear":1813,"genre":["Classic","Romance"],"synopsis":"This classic novel explores the themes of love and social class as Elizabeth Bennet navigates societal expectations, misunderstandings, and her evolving feelings for the proud Mr. Darcy in Regency-era England.","image":"https://m.media-amazon.com/images/I/61H3BvN-naL._AC_UF894,1000_QL80_.jpg","id":2},{"title":"City of Bones (The Mortal Instruments)","author":"Cassandra Clare","publicationYear":2007,"genre":["Urban Fantasy","Young Adult","Romance"],"synopsis":"Clary Fray discovers a hidden world of Shadowhunters—warriors who hunt demons—in modern-day New York City. Alongside the mysterious Jace, she uncovers family secrets and battles dark forces, all while navigating the complexities of love and loyalty.","image":"https://media.s-bol.com/kDVn0X4LzJxJ/xnkOxXE/547x840.jpg","id":3},{"title":"Red Queen","author":"Victoria Aveyard","publicationYear":2015,"genre":["Young Adult","Fantasy","Dystopian","Romance"],"synopsis":"In a world divided by blood—Reds, commoners with red blood, and Silvers, elite with silver blood and superhuman abilities—Mare Barrow, a Red with a surprising power, is thrust into the dangerous world of the Silver Court. Political intrigue and forbidden romance ensue as she navigates this treacherous landscape.","image":"https://m.media-amazon.com/images/I/410KardJA5L.jpg","id":4},{"title":"The Shining","author":"Stephen King","publicationYear":1977,"genre":["Horror"],"synopsis":"Jack Torrance, an aspiring writer, takes a job as the winter caretaker of the isolated Overlook Hotel. As the hotel becomes snowbound, supernatural forces start to influence Jack, putting his family in great danger.","image":"https://cdn.kobo.com/book-images/24509a7e-fb62-4023-8382-e2e315128a48/353/569/90/False/the-shining-varsel.jpg","id":5},{"title":"Sapiens: A Brief History of Humankind","author":"Yuval Noah Harari","publicationYear":2014,"genre":["Non-Fiction","History"],"synopsis":"Harari provides a compelling overview of the history of the human species, from the emergence of Homo sapiens in Africa to the present day. The book explores cultural, social, and technological developments that shaped human societies.","image":"https://m.media-amazon.com/images/I/713jIoMO3UL._AC_UF894,1000_QL80_.jpg","id":6},{"title":"Harry Potter and the Sorcerer's Stone","author":"J.K. Rowling","publicationYear":1997,"genre":["Fantasy","Children's Literature"],"synopsis":"The first book in the beloved Harry Potter series introduces young readers to the magical world of Hogwarts School of Witchcraft and Wizardry. Harry discovers his own magical abilities and uncovers a deeper mystery surrounding his past.","image":"https://target.scene7.com/is/image/Target/GUEST_2b5fb53f-3420-484f-9c36-0abfe0c9c38e?wid=488&hei=488&fmt=pjpeg","id":7}
+];
+const bookDef=[,,jpath.either(undefined,{
+				id	:jpath.ID(),
+				title	:String,
+				author	:String,
+				publicationYear:Number,
+				genre	:jpath.either(undefined,[,,String]),
+				synopsis:jpath.either(undefined,String),
+				image	:jpath.either(undefined,String),
+			})];
+assertFalse(
+	()=>valueTest(bookDef)(books)
+)
+delete books[0];
+assertFalse(
+	()=>valueTest(bookDef)(books)
+)

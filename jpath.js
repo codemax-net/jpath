@@ -219,7 +219,7 @@ const valueTest=(pattern,errorMessage)=>{
 				}));
                 return (v,...args) =>{//V[k]==v
                     //console.log('testing',v,k, 'with', nameValueTests);
-                    if(v===undefined){
+                    if((v===undefined)||(v===null)){
                         return `"${getPath(v,...args)}" ${errorMessage||'must be defined...'}`;
                     };
 					if(typeof v != 'object'){
