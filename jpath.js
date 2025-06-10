@@ -349,7 +349,7 @@
 		return	(value,key,self,skey,parent,...ancestors) => 
 					(test && test(value,key,self,skey,parent,...ancestors)) || parentTest(parent,...ancestors) ||
 						( (parent=Array.isArray(parent)?parent:Object.values(parent)) && 
-							(self==parent.findLast(item=>item[key]==value)
+							(self==parent.find((item,index)=> (index<=skey) && (item[key]==value))
 						)?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be unique`);
 	}
 
