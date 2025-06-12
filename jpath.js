@@ -265,10 +265,10 @@
 	const empty=(pattern)=>{
 		const test=valueTest(pattern);
 		if(test({})){//the pattern does not match objects
-			console.log('empty using length');
+			//console.log('empty using length');
 			return (v,...args) => test(v,...args) || (!v.length?0:`"${getPath(v,...args)}" must be empty`);	
 		}else{
-			console.log('empty using keys');
+			//console.log('empty using keys');
 			return (v,...args) => test(v,...args) || (!Object.keys(v).length?0:`"${getPath(v,...args)}" must be empty`);
 		}	
 	}
@@ -434,6 +434,23 @@
 	const isoDate=()=>{
 		return (v,...args)=> isNaN(new Date(v).valueOf())?`${getPath(v,...args)} "${v}" must be a valid iso time stamp`:0;
 	}
+	
+	const voidTest=(v,...args)=>{
+		if((v===undefined)||(v===null)){
+			return 0;
+		};
+		let ok=false;
+		switch(typeof v){
+			case 'object':
+				ok= (Array.isArray(v) && !v.length) || !Object.keys(v).length;
+				break;
+			case 'string':
+				ok=!v.length;
+				break;			
+		}	
+		return ok?0:`"${getPath(v,...args)}" must be empty`;
+	};
+	
 	Object.assign(designator,{
 			sealed:sSealed,
 			getKeys		,
@@ -458,6 +475,7 @@
 			phone		,
 			isoDate		,
 			testOrUpdate,
+			voidTest
 	})
 
 })(typeof module!='undefined'?(module.exports||={}):(globalThis[Symbol.for('@codemax.net/jpath')]||={}));

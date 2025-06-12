@@ -174,11 +174,34 @@ assertTrue('every object in the dataset has an id and an email string property',
 	)
 );
 
-console.group(FG_YELLOW,'empty, notEmpty, limit',FG_RESET);
+console.group(FG_YELLOW,'empty, notEmpty, void, limit',FG_RESET);
+	assertFalse(()=>valueTest(jpath.voidTest)(''));
+	assertFalse(()=>valueTest(jpath.voidTest)([]));
+	assertFalse(()=>valueTest(jpath.voidTest)({}));
+	assertFalse(()=>valueTest(jpath.voidTest)());
+	assertFalse(()=>valueTest(jpath.voidTest)(null));
+										
+	assertTrue( ()=>valueTest(jpath.voidTest)('x'));
+	assertTrue( ()=>valueTest(jpath.voidTest)([1]));
+	assertTrue( ()=>valueTest(jpath.voidTest)({x:1}));
+	assertTrue( ()=>valueTest(jpath.voidTest)(0));
+	assertTrue( ()=>valueTest(jpath.voidTest)(false));
+
+
 	assertFalse(()=>valueTest(jpath.empty(String))(''));
 	assertFalse(()=>valueTest(jpath.empty(Array))([]));
+	assertFalse(()=>valueTest(jpath.empty(Object))({}));
+	assertFalse(()=>valueTest(jpath.empty(Object))([]));
+	assertFalse(()=>valueTest(jpath.empty(()=>0))({}));
+	assertFalse(()=>valueTest(jpath.empty(()=>0))([]));	
+	assertFalse(()=>valueTest(jpath.empty(()=>0))(''));
+	
 	assertTrue(()=>valueTest(jpath.empty(String))([]));
 	assertTrue(()=>valueTest(jpath.empty(Array))(''));
+	assertTrue(()=>valueTest(jpath.empty(Array))({}));
+	assertTrue(()=>valueTest(jpath.empty())({}));
+	assertTrue(()=>valueTest(jpath.empty())([]));	
+	assertTrue(()=>valueTest(jpath.empty())(''));	
 	
 	assertFalse(()=>valueTest(jpath.notEmpty(String))('abc'));
 	assertFalse(()=>valueTest(jpath.notEmpty(Array))([1,2,3]));
