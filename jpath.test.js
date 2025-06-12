@@ -410,18 +410,29 @@ console.group(FG_YELLOW,'test versus filter results',FG_RESET);
 	);
 console.groupEnd();
 
+console.group(FG_YELLOW,'test jpath.unique',FG_RESET);
+assertTrue(
+	()=>valueTest([,,{
+		name:jpath.unique(String)
+	}])(Object.values(dataset))
+);
+assertFalse(
+	()=>valueTest([,,{
+		email:jpath.unique(String)
+	}])(Object.values(dataset))
+)
+
 assertTrue(
 	()=>valueTest({'*':{
 		name:jpath.unique(String)
 	}})(dataset)
 );
-
 assertFalse(
 	()=>valueTest({'*':{
 		email:jpath.unique(String)
 	}})(dataset)
 )
-
+console.groupEnd();
 
 assertFalse('Sealed test(all the object properties are validated)',
 	()=>valueTest({

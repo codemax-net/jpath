@@ -167,7 +167,7 @@
 				switch(pattern){
 					case Number  :return (v,...args) => (typeof v == 'number')  ?0:(`"${getPath(v,...args)}"(${v}) ${errorMessage||'must be a number'}`);
 					case String  :return (v,...args) => (typeof v == 'string')  ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a string'}`);
-					case Boolean :return (v,...args) => (typeof v == 'boolean') ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a boolean'}`);
+					case Boolean :return (v,...args) => (typeof v == 'boolean') ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a boolean'}, found ${v}`);
 					case Object  :return (v,...args) => (typeof v == 'object')  ?0:(`"${getPath(v,...args)}" ${errorMessage||'must be an object'}`);
 					case Function:return (v,...args) => (typeof v == 'function')?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a function'}`);
 					case Date 	 :return (v,...args) => (!isNaN(new Date(v).valueOf()))?0:(`"${getPath(v,...args)}" ${errorMessage||'must be a valid date/time'}`);
@@ -347,10 +347,22 @@
 		const test=pattern && valueTest(pattern);
 		const parentTest=valueTest(Object);
 		return	(value,key,self,skey,parent,...ancestors) => 
-					(test && test(value,key,self,skey,parent,...ancestors)) || parentTest(parent,...ancestors) ||
-						( (parent=Array.isArray(parent)?parent:Object.values(parent)) && 
-							(self==parent.find((item,index)=> (index<=skey) && (item[key]==value))
-						)?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be unique`);
+					(test && test(value,key,self,skey,parent,...ancestors)) || //error pattern doesn't match
+					parentTest(parent,...ancestors) ||						   //error parent is not an object
+					(/*
+						[parent
+							[skey]{self
+								[key]:value
+							}
+						]
+						if we search in parent we should find 
+							a single object | object[key]==value, object==self
+					*/					
+						(Array.isArray(parent)
+							?self==parent.find((item,index)=> (index<=skey) && (item[key]==value))
+							:self==Object.values(parent).findLast((item,index)=> item[key]==value)
+						)?0:`"${getPath(value,key,self,skey,parent,...ancestors)}" must be unique`
+					);
 	}
 
 	const either=(...patterns)=>{
